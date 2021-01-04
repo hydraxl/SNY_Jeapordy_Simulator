@@ -8,7 +8,7 @@ import time
 # simulates a single game played given a set of conditions
 def run_trial(condition):
     current_team_num = 0
-    team_points = {team: 0 for team in condition.teams}
+    team_points = np.zeros(condition.team_num)
     for board_num in range(condition.board_num):
         board = condition.build_board(board_num + 1)
         while True in board.view_availability():
