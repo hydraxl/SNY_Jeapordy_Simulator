@@ -5,30 +5,35 @@ import random
 import numpy as np
 import time
 
+# Determine which team to assign points
+def assign_points(team_points, teams, question, rand_num):
+    team_num = len(teams)
+    odds = 0
+    for i in range(team_num):
+        odds += teams[i].difficulty_scale[question] * (1 - odds)
+        if rand_num <= odds: return i
+    return None
+
 # simulates a single game played given a set of conditions
 def run_trial(condition):
     current_team_num = 0
     team_points = np.zeros(condition.team_num)
-    for board_num in range(condition.board_num):
-        board = condition.build_board(board_num + 1)
+    for board in condition.boards:
         while True in board.view_availability():
             # determine the category/question selected based on team's strategy
-            current_team = condition.teams[current_team_num]
-            rotated_points = np.roll(team_points, current_team_num)
-            category = current_team.strategy(board, current_team.difficulty_scale, rotated_points)
-            question = board.view_question_nums(category)
+            rotated_points = np.roll(team_points, -current_team_num)
+            rotated_teams = np.roll(condition.teams, -current_team_num)
+            category = rotated_teams[0].strategy(board, rotated_teams[0].difficulty_scale, rotated_points)
+            question = board.view_question_nums()[category]
+            points = board.select(category)
 
             # assign points based on distribution
-            points = board.select(category)
-            for team in np.roll(condition.teams, current_team_num):
-                if random.random() <= team.correct_odds(question):
-                    team_points[team] += points
-                    break
+            winner = assign_points(rotated_points, rotated_teams, question, random.random())
+            if winner != None: team_points[(winner + current_team_num) % condition.team_num] += points
 
             # cycle current_team_num
             current_team_num += 1
             current_team_num %= condition.team_num
-
 
     return team_points
 
@@ -57,3 +62,17 @@ def run_condition(condition, n=1000):
     np.savetxt(condition.name + '.dat', score_table)
     '''
     return score_table
+
+
+# Show data
+condition = conditions.deterministic
+data = run_trial(condition)
+print(data)
+'''
+bin_func = by_gap(100)
+print_data(data)
+print('Win Odds: ' + str(win_odds(data)))
+boxplot(data, condition.name)
+histogram_lines(data, condition.name, bin_func)
+plt.show()
+'''

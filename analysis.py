@@ -1,4 +1,3 @@
-import conditions
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -68,17 +67,3 @@ def boxplot(data, name):
 # Data array must be transposed before entering
 by_num = lambda num: lambda data: np.concatenate((np.arange(np.amin(data), np.amax(data), (np.amax(data) - np.amin(data)) / (num - 1)), np.array([np.amax(data)])))
 by_gap = lambda gap: lambda data: np.arange(np.amin(data), np.amax(data) + gap, gap)
-
-'''
-# Show data
-condition = conditions.highest_fair50_condition
-data = load_scores(condition.name)
-bin_func = by_gap(100)
-print_data(data)
-print('Win Odds: ' + str(win_odds(data)))
-#overlapping_histograms(data, condition.name, bin_func)
-boxplot(data, condition.name)
-#histogram_plot(data, condition.name, bin_func)
-histogram_lines(data, condition.name, bin_func)
-plt.show()
-'''

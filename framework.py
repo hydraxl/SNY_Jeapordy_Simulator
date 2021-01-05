@@ -17,14 +17,15 @@ class Board:
     view_question_nums = lambda self: self.questions[:]
 
 class Team:
-    def __init__(self, strategy, diffuculty_scale):
-        self.diffuculty_scale = diffuculty_scale
+    def __init__(self, strategy, difficulty_scale, num):
+        self.difficulty_scale = difficulty_scale
         self.strategy = strategy
+        self.num = num
 
 class Condition:
     def __init__(self, strategy_assigner, difficulty_scale_assigner, team_num=3, board_num=2, category_num=5, question_num=5):
         self.team_num = team_num
         self.question_num = question_num
         self.category_num = category_num
-        self.teams = [Team(strategy_assigner(i, team_num), difficulty_scale_assigner(i, team_num)) for i in range(team_num)]
-        self.boards = [Board(i, category_num, question_num) for i in range(board_num)]
+        self.teams = [Team(strategy_assigner(i, team_num), difficulty_scale_assigner(i, team_num)(question_num), i) for i in range(team_num)]
+        self.boards = [Board(i + 1, category_num, question_num) for i in range(board_num)]

@@ -89,40 +89,40 @@ all_hard = all_scale_x(hard)
 #   that are different on higher difficulties
 
 # Always takes the highest point value and answers correctly
-deterministic = framework.Condition(strategy_assigner=all_highest, difficulty_scale_assigner=all_easy)
+deterministic = framework.Condition(all_highest, all_easy)
 
 # Chooses questions by greed with medium difficulty
-medium_greedy = framework.Condition(strategy_assigner=all_greedy, difficulty_scale_assigner=all_medium)
+medium_greedy = framework.Condition(all_greedy, all_medium)
 
 # Chooses questions by greed with hard difficulty
-hard_greedy = framework.Condition(strategy_assigner=all_greedy, difficulty_scale_assigner=all_hard)
+hard_greedy = framework.Condition(all_greedy, all_hard)
 
 # Chooses highest point value questions with medium difficulty
-medium_highest = framework.Condition(strategy_assigner=all_highest, difficulty_scale_assigner=all_medium)
+medium_highest = framework.Condition(all_highest, all_medium)
 
 # Chooses highest point value questions with hard difficulty
-hard_highest = framework.Condition(strategy_assigner=all_highest, difficulty_scale_assigner=all_hard)
+hard_highest = framework.Condition(all_highest, all_hard)
 
 # Question choice is random and weighted by point value, easy difficulty
-easy_by_points = framework.Condition(strategy_assigner=all_by_points, difficulty_scale_assigner=all_easy)
+easy_by_points = framework.Condition(all_by_points, all_easy)
 
 # Question choice is random and weighted by point value, medium difficulty
-medium_by_points = framework.Condition(strategy_assigner=all_by_points, difficulty_scale_assigner=all_medium)
+medium_by_points = framework.Condition(all_by_points, all_medium)
 
 # Question choice is random and weighted by point value, hard difficulty
-hard_by_points = framework.Condition(strategy_assigner=all_by_points, difficulty_scale_assigner=all_hard)
+hard_by_points = framework.Condition(all_by_points, all_hard)
 
 # Question choice is random, easy difficulty
-easy_random = framework.Condition(strategy_assigner=all_base_strat, difficulty_scale_assigner=all_easy)
+easy_random = framework.Condition(all_base_strat, all_easy)
 
 # Question choice is random, medium difficulty
-medium_random = framework.Condition(strategy_assigner=all_base_strat, difficulty_scale_assigner=all_medium)
+medium_random = framework.Condition(all_base_strat, all_medium)
 
 # Question choice is random, hard difficulty
-hard_random = framework.Condition(strategy_assigner=all_base_strat, difficulty_scale_assigner=all_hard)
+hard_random = framework.Condition(all_base_strat, all_hard)
 
 # Question choice is random weighted by greed, medium difficulty
-medium_random_greedy = framework.Condition(strategy_assigner=all_greedy_weighted, difficulty_scale_assigner=all_medium)
+medium_random_greedy = framework.Condition(all_greedy_weighted, all_medium)
 
 # Question choice is random weighted by greed, hard difficulty
-hard_random = framework.Condition(strategy_assigner=all_greedy_weighted, difficulty_scale_assigner=all_hard)
+hard_random = framework.Condition(all_greedy_weighted, all_hard)
