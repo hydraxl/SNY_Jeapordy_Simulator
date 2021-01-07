@@ -8,13 +8,13 @@ from itertools import permutations
 #   Output: question index
 
 # pick randomly
-def base_strat(board, difficulty_scale, current_scores):
+def unweighted(board, difficulty_scale, current_scores):
     availability = board.view_availability()
     options = [i for i in range(len(availability)) if availability[i]]
     return random.choice(options)
 
-# random weighted by point value
-def by_points(board, difficulty_scale, current_scores):
+# stochastically weighted by point value
+def spv(board, difficulty_scale, current_scores):
     vals = board.view_values()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
@@ -22,21 +22,22 @@ def by_points(board, difficulty_scale, current_scores):
     return random.choices(options, weights=weights)[0]
 
 # highest point value
-def highest(board, difficulty_scale, current_scores):
+def greedy(board, difficulty_scale, current_scores):
     vals = board.view_values()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
     return max(options)
 
-# random weighted by point value and odds of guessing correctly
-def greedy_random(board, difficulty_scale, current_scores):
+# stochastic expected value
+def sev(board, difficulty_scale, current_scores):
     vals = board.view_question_nums()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
     weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
     return random.choices(options)[0]
 
-def greedy_deterministic(board, difficulty_scale, current_scores):
+# expected value
+def ev(board, difficulty_scale, current_scores):
     vals = board.view_question_nums()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
@@ -51,9 +52,10 @@ def greedy_deterministic(board, difficulty_scale, current_scores):
 # even distribution from easiest to hardest
 scale_maker = lambda hardest, easiest: lambda question_num: np.array([hardest + ((easiest - hardest) / (question_num - 1)) * question for question in range(question_num)]) if question_num > 1 else (hardest + easiest) / 2
 
-easy = scale_maker(1, 1)
-medium = scale_maker(.5, 1)
-hard = scale_maker(.3, .7)
+baseline = scale_maker(1, 1)
+easy = scale_maker(.7, .9)
+medium = scale_maker(.5, .9)
+hard = scale_maker(.3, .9)
 
 
 # Strategy Assigners
@@ -63,11 +65,11 @@ hard = scale_maker(.3, .7)
 # All teams use the same strategy
 all_strat_x = lambda strat: lambda current, total: strat
 
-all_base_strat = all_strat_x(base_strat)
-all_by_points = all_strat_x(by_points)
-all_highest = all_strat_x(highest)
-all_greedy = all_strat_x(greedy_deterministic)
-all_greedy_weighted = all_strat_x(greedy_random)
+all_unweighted = all_strat_x(unweighted)
+all_spv = all_strat_x(spv)
+all_greedy = all_strat_x(greedy)
+all_ev = all_strat_x(ev)
+all_sev = all_strat_x(sev)
 
 
 # Difficulty Assigners
@@ -77,6 +79,7 @@ all_greedy_weighted = all_strat_x(greedy_random)
 # All teams use the same strategy
 all_scale_x = lambda scale: lambda current, total: scale
 
+all_baseline = all_scale_x(baseline)
 all_easy = all_scale_x(easy)
 all_medium = all_scale_x(medium)
 all_hard = all_scale_x(hard)
@@ -89,43 +92,20 @@ all_hard = all_scale_x(hard)
 #   that are different on higher difficulties
 
 # Always takes the highest point value and answers correctly
-deterministic = framework.Condition(all_highest, all_easy)
+deterministic = framework.Condition(all_greedy, all_baseline)
 
-# Chooses questions by greed with medium difficulty
+easy_ev = framework.Condition(all_ev, all_easy)
+medium_ev = framework.Condition(all_ev, all_medium)
+hard_ev = framework.Condition(all_ev, all_hard)
+easy_greedy = framework.Condition(all_greedy, all_easy)
 medium_greedy = framework.Condition(all_greedy, all_medium)
-
-# Chooses questions by greed with hard difficulty
 hard_greedy = framework.Condition(all_greedy, all_hard)
-
-# Chooses highest point value questions with medium difficulty
-medium_highest = framework.Condition(all_highest, all_medium)
-
-# Chooses highest point value questions with hard difficulty
-hard_highest = framework.Condition(all_highest, all_hard)
-
-# Question choice is random and weighted by point value, easy difficulty
-easy_by_points = framework.Condition(all_by_points, all_easy)
-
-# Question choice is random and weighted by point value, medium difficulty
-medium_by_points = framework.Condition(all_by_points, all_medium)
-
-# Question choice is random and weighted by point value, hard difficulty
-hard_by_points = framework.Condition(all_by_points, all_hard)
-
-# Question choice is random, easy difficulty
-easy_random = framework.Condition(all_base_strat, all_easy)
-
-# Question choice is random, medium difficulty
-medium_random = framework.Condition(all_base_strat, all_medium)
-
-# Question choice is random, hard difficulty
-hard_random = framework.Condition(all_base_strat, all_hard)
-
-# Question choice is random weighted by greed, medium difficulty
-medium_random_greedy = framework.Condition(all_greedy_weighted, all_medium)
-
-# Question choice is random weighted by greed, hard difficulty
-hard_random = framework.Condition(all_greedy_weighted, all_hard)
+easy_sev = framework.Condition(all_sev, all_easy)
+medium_sev = framework.Condition(all_sev, all_medium)
+hard_sev = framework.Condition(all_sev, all_hard)
+easy_spv = framework.Condition(all_spv, all_easy)
+medium_spv = framework.Condition(all_spv, all_medium)
+hard_spv = framework.Condition(all_spv, all_hard)
 
 # Dictionary of all conditions
-all_conditions = {'hard_random': hard_random, 'medium_random_greedy': medium_random_greedy, 'hard_random': hard_random, 'medium_random': medium_random, 'easy_random': easy_random, 'hard_by_points': hard_by_points, 'medium_by_points': medium_by_points, 'easy_by_points': easy_by_points, 'hard_highest': hard_highest, 'medium_highest': medium_highest, 'hard_greedy': hard_greedy, 'medium_greedy': medium_greedy, 'deterministic': deterministic}
+all_conditions = {'easy_ev': easy_ev, 'medium_ev': medium_ev, 'hard_ev': hard_ev, 'easy_greedy': easy_greedy, 'medium_greedy': medium_greedy, 'hard_greedy': hard_greedy, 'easy_sev': easy_sev, 'medium_sev': medium_sev, 'hard_sev': hard_sev, 'easy_spv': easy_spv, 'medium_spv': medium_spv, 'hard_spv': hard_spv}
