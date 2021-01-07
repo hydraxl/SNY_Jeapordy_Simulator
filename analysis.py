@@ -9,7 +9,7 @@ load_scores = lambda name: np.loadtxt(open(name + '.dat'))
 def winner(trial_data):
     highest = max(trial_data)
     index = np.where(trial_data == highest)[0]
-    return index[0] if len(index) == 0 else None
+    return index[0] if len(index) == 1 else None
 
 win_tie = lambda trial_data: np.where(trial_data == highest)[0]
 
@@ -62,8 +62,7 @@ def boxplot(data, name=''):
     plt.ylabel("Points Scored")
     plt.title(name)
 
-def show():
-    plt.show()
+def show(): plt.show()
 
 # Bin Functions
 # Data array must be transposed before entering

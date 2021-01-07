@@ -65,11 +65,14 @@ def run_condition(condition, n=1000):
 
 
 # Show data
-condition = conditions.hard_highest
-data = run_condition(condition)
-bin_func = analysis.by_gap(300)
-analysis.print_data(data)
-print('Win Odds: ' + str(analysis.win_odds(data)))
-analysis.boxplot(data, "hard_highest")
-analysis.histogram(data, bin_func, "hard_highest")
-analysis.show()
+def analyze_condition(condition, name=''):
+    data = run_condition(condition)
+    bin_func = analysis.by_gap(300)
+    analysis.print_data(data)
+    print('Win Odds: ' + str(analysis.win_odds(data)))
+    analysis.boxplot(data, name)
+    analysis.histogram(data, bin_func, name)
+    analysis.show()
+    print('\n')
+
+for name, condition in conditions.all_conditions.items(): analyze_condition(condition, name)

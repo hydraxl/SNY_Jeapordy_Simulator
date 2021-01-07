@@ -33,14 +33,14 @@ def greedy_random(board, difficulty_scale, current_scores):
     vals = board.view_question_nums()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
-    weights = [vals[i] * difficulty_scale[vals[i]][0] for i in range(len(vals)) if availability[i]]
+    weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
     return random.choices(options)[0]
 
 def greedy_deterministic(board, difficulty_scale, current_scores):
     vals = board.view_question_nums()
     availability = board.view_availability()
     options = [i for i in range(len(vals)) if availability[i]]
-    weights = [vals[i] * difficulty_scale[vals[i]][0] for i in range(len(vals)) if availability[i]]
+    weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
     return options[weights.index(max(weights))]
 
 
@@ -126,3 +126,6 @@ medium_random_greedy = framework.Condition(all_greedy_weighted, all_medium)
 
 # Question choice is random weighted by greed, hard difficulty
 hard_random = framework.Condition(all_greedy_weighted, all_hard)
+
+# Dictionary of all conditions
+all_conditions = {'hard_random': hard_random, 'medium_random_greedy': medium_random_greedy, 'hard_random': hard_random, 'medium_random': medium_random, 'easy_random': easy_random, 'hard_by_points': hard_by_points, 'medium_by_points': medium_by_points, 'easy_by_points': easy_by_points, 'hard_highest': hard_highest, 'medium_highest': medium_highest, 'hard_greedy': hard_greedy, 'medium_greedy': medium_greedy, 'deterministic': deterministic}
