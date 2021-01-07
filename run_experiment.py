@@ -18,7 +18,8 @@ def assign_points(team_points, teams, question, rand_num):
 def run_trial(condition):
     current_team_num = 0
     team_points = np.zeros(condition.team_num)
-    for board in condition.boards:
+    for i in range(condition.board_num):
+        board = framework.Board(i + 1, condition.category_num, condition.question_num)
         while True in board.view_availability():
             # determine the category/question selected based on team's strategy
             rotated_points = np.roll(team_points, -current_team_num)
@@ -45,11 +46,10 @@ def run_condition(condition, n=1000):
     seconds = 1
     '''
     score_table = np.zeros((n, condition.team_num))
-
     for i in range(n):
         # Run trials
         new_vals = run_trial(condition)
-        score_table[i, :] += new_vals
+        score_table[i] += new_vals
 
         '''
         # Mark time so code is verifiably still running
@@ -65,14 +65,11 @@ def run_condition(condition, n=1000):
 
 
 # Show data
-condition = conditions.deterministic
-data = run_trial(condition)
-print(data)
-'''
-bin_func = by_gap(100)
-print_data(data)
-print('Win Odds: ' + str(win_odds(data)))
-boxplot(data, condition.name)
-histogram_lines(data, condition.name, bin_func)
-plt.show()
-'''
+condition = conditions.hard_highest
+data = run_condition(condition)
+bin_func = analysis.by_gap(300)
+analysis.print_data(data)
+print('Win Odds: ' + str(analysis.win_odds(data)))
+analysis.boxplot(data, "hard_highest")
+analysis.histogram(data, bin_func, "hard_highest")
+analysis.show()

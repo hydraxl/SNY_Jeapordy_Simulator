@@ -28,4 +28,4 @@ class Condition:
         self.question_num = question_num
         self.category_num = category_num
         self.teams = [Team(strategy_assigner(i, team_num), difficulty_scale_assigner(i, team_num)(question_num), i) for i in range(team_num)]
-        self.boards = [Board(i + 1, category_num, question_num) for i in range(board_num)]
+        self.board_num = board_num
