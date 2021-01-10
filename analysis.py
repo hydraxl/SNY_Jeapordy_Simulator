@@ -6,18 +6,30 @@ load_scores = lambda name: np.loadtxt(open(name + '.dat'))
 '''
 
 # Trial Measurements
-def winner(trial_data):
-    highest = max(trial_data)
-    index = np.where(trial_data == highest)[0]
-    return index[0] if len(index) == 1 else None
+winner = lambda trial_data: np.where(trial_data == max(trial_data))[0][0] if len(np.where(trial_data == max(trial_data))[0]) == 1 else None
 
-win_tie = lambda trial_data: np.where(trial_data == highest)[0]
+win_tie = lambda trial_data: np.where(trial_data == max(trial_data))[0]
+
+# difference between first and second place
+advantage = lambda trial_data: max(trial_data) - sorted(trial_data)[-2]
+
+# difference between each team and first place
+amt_behind = lambda trial_data: [max(trial_data) - trial_data[team] for team in trial_data]
+
 
 # Aggregate Measurements
+
+# takes a statistic of every trial
+collate = lambda f, data: [f(trial) for trial in data]
+
+# counts the instances of n in a list recursively
+count_n = lambda n, data: sum([count_n(n, i) if type(i) == list or type(i) == np.ndarray else 1 if i == n else 0 for i in data])
+
 def win_or_tie_odds(data):
-    win_counter = np.zeros(np.shape(data)[1], dtype=int)
-    for trial in data:
-        for i in win_tie(trial): win_counter[i] += 1
+    num_teams = np.shape(data)[1]
+    win_counter = np.zeros(num_teams)
+    winners = collate(win_tie, data)
+    for i in range(num_teams): win_counter[i] += count_n(i, winners)
     return win_counter / sum(win_counter)
 
 def win_odds(data):
@@ -37,7 +49,7 @@ def print_data(data):
     print("Stddevs: " + str(stddevs(data)))
     print("IQRs: " + str(iqr(data)))
 
-def histogram(data, bin_func, name=''):
+def histogram(data, bin_func, name='', purpose='Points Scored'):
     data = data.T
     num_teams = np.shape(data)[0]
     bins = bin_func(data)
@@ -50,16 +62,16 @@ def histogram(data, bin_func, name=''):
     for i in range(num_teams):
         Y = np.array([hist_data[i], hist_data[i]]).T.flatten()
         plt.plot(X, Y, label="team " + str(i + 1))
-    plt.xlabel("Points Scored")
+    plt.xlabel(purpose)
     plt.ylabel("Count")
     plt.title(name)
     plt.legend(loc='upper right')
 
-def boxplot(data, name=''):
+def boxplot(data, name='', purpose='Points Scored'):
     plt.figure()
     plt.boxplot(data)
-    plt.xlabel("Team Number")
-    plt.ylabel("Points Scored")
+    plt.xlabel('Team Number')
+    plt.ylabel(purpose)
     plt.title(name)
 
 def show(): plt.show()

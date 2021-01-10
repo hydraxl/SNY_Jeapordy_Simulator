@@ -5,14 +5,14 @@ import random
 import numpy as np
 import time
 
-# Determine which team to assign points
-def assign_points(team_points, teams, question, rand_num):
-    team_num = len(teams)
-    odds = 0
-    for i in range(team_num):
-        odds += teams[i].difficulty_scale[question] * (1 - odds)
-        if rand_num <= odds: return i
-    return None
+# Returns sequence 1 element at a time, then repeats
+def test_seq(seq):
+    def internal_generator():
+        s = seq[:]
+        while True:
+            for n in s: yield n
+    g = internal_generator()
+    return lambda: next(g)
 
 # simulates a single game played given a set of conditions
 def run_trial(condition):
@@ -29,8 +29,8 @@ def run_trial(condition):
             points = board.select(category)
 
             # assign points based on distribution
-            winner = assign_points(rotated_points, rotated_teams, question, random.random())
-            if winner != None: team_points[(winner + current_team_num) % condition.team_num] += points
+            winner = condition.point_assigner(rotated_points, rotated_teams, question, random.random)
+            for team in winner: team_points[(team + current_team_num) % condition.team_num] += points
 
             # cycle current_team_num
             current_team_num += 1
@@ -39,7 +39,6 @@ def run_trial(condition):
     return team_points
 
 # simulates n games played given a set of conditions
-# saves results to .dat file - filename given in the condition
 def run_condition(condition, n=1000):
     '''
     current_time = time.time()
@@ -66,13 +65,20 @@ def run_condition(condition, n=1000):
 
 # Show data
 def analyze_condition(condition, name=''):
+    print(name)
     data = run_condition(condition)
-    bin_func = analysis.by_gap(300)
-    analysis.print_data(data)
+    #bin_func = analysis.by_gap(300)
+    #analysis.print_data(data)
     print('Win Odds: ' + str(analysis.win_odds(data)))
-    analysis.boxplot(data, name)
-    analysis.histogram(data, bin_func, name)
-    analysis.show()
+    print('Mean Scores:' + str(analysis.means(data)))
+    #analysis.boxplot(data, name)
+    #analysis.histogram(data, bin_func, name)
     print('\n')
+    return analysis.win_odds(data)
 
-for name, condition in conditions.all_conditions.items(): analyze_condition(condition, name)
+for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
+#print(run_trial(conditions.deterministic))
+#analyze_condition(conditions.easy_greedy, "easy")
+#analyze_condition(conditions.medium_greedy, "medium")
+#analyze_condition(conditions.hard_greedy, "hard")
+#analysis.show()

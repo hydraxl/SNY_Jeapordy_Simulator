@@ -44,6 +44,12 @@ def ev(board, difficulty_scale, current_scores):
     weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
     return options[weights.index(max(weights))]
 
+'''
+# greedy, avoid 3rd question
+def not_3rd(board, difficulty_scale, current_scores):
+    vals = board.view_question_nums()
+    availability = board.view_availability()
+'''
 
 # Difficulty Functions (odds of answering the question correctly by team)
 #   Input: question_num
@@ -56,7 +62,6 @@ baseline = scale_maker(1, 1)
 easy = scale_maker(.7, .9)
 medium = scale_maker(.5, .9)
 hard = scale_maker(.3, .9)
-
 
 # Strategy Assigners
 #   Input: total number of teams, current team
@@ -94,18 +99,29 @@ all_hard = all_scale_x(hard)
 # Always takes the highest point value and answers correctly
 deterministic = framework.Condition(all_greedy, all_baseline)
 
-easy_ev = framework.Condition(all_ev, all_easy)
-medium_ev = framework.Condition(all_ev, all_medium)
-hard_ev = framework.Condition(all_ev, all_hard)
-easy_greedy = framework.Condition(all_greedy, all_easy)
-medium_greedy = framework.Condition(all_greedy, all_medium)
-hard_greedy = framework.Condition(all_greedy, all_hard)
-easy_sev = framework.Condition(all_sev, all_easy)
-medium_sev = framework.Condition(all_sev, all_medium)
-hard_sev = framework.Condition(all_sev, all_hard)
-easy_spv = framework.Condition(all_spv, all_easy)
-medium_spv = framework.Condition(all_spv, all_medium)
-hard_spv = framework.Condition(all_spv, all_hard)
-
 # Dictionary of all conditions
-all_conditions = {'easy_ev': easy_ev, 'medium_ev': medium_ev, 'hard_ev': hard_ev, 'easy_greedy': easy_greedy, 'medium_greedy': medium_greedy, 'hard_greedy': hard_greedy, 'easy_sev': easy_sev, 'medium_sev': medium_sev, 'hard_sev': hard_sev, 'easy_spv': easy_spv, 'medium_spv': medium_spv, 'hard_spv': hard_spv}
+std_conditions = {'easy ev': framework.Condition(all_ev, all_easy),
+'medium ev': framework.Condition(all_ev, all_medium),
+'hard ev': framework.Condition(all_ev, all_hard),
+'easy greedy': framework.Condition(all_greedy, all_easy),
+'medium greedy': framework.Condition(all_greedy, all_medium),
+'hard greedy': framework.Condition(all_greedy, all_hard),
+'easy sev': framework.Condition(all_sev, all_easy),
+'medium sev': framework.Condition(all_sev, all_medium),
+'hard sev': framework.Condition(all_sev, all_hard),
+'easy spv': framework.Condition(all_spv, all_easy),
+'medium spv': framework.Condition(all_spv, all_medium),
+'hard spv': framework.Condition(all_spv, all_hard)}
+
+split_assigner_conditions = {'easy ev': framework.Condition(all_ev, all_easy, point_assigner=framework.split_give_pts),
+'medium ev': framework.Condition(all_ev, all_medium, point_assigner=framework.split_give_pts),
+'hard ev': framework.Condition(all_ev, all_hard, point_assigner=framework.split_give_pts),
+'easy greedy': framework.Condition(all_greedy, all_easy, point_assigner=framework.split_give_pts),
+'medium greedy': framework.Condition(all_greedy, all_medium, point_assigner=framework.split_give_pts),
+'hard greedy': framework.Condition(all_greedy, all_hard, point_assigner=framework.split_give_pts),
+'easy sev': framework.Condition(all_sev, all_easy, point_assigner=framework.split_give_pts),
+'medium sev': framework.Condition(all_sev, all_medium, point_assigner=framework.split_give_pts),
+'hard sev': framework.Condition(all_sev, all_hard, point_assigner=framework.split_give_pts),
+'easy spv': framework.Condition(all_spv, all_easy, point_assigner=framework.split_give_pts),
+'medium spv': framework.Condition(all_spv, all_medium, point_assigner=framework.split_give_pts),
+'hard spv': framework.Condition(all_spv, all_hard, point_assigner=framework.split_give_pts)}
