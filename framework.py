@@ -62,7 +62,7 @@ def split_give_pts(teams, question, points, rand_func):
 
 
 class Condition:
-    def __init__(self, strategy_assigner, difficulty_scale_assigner, point_assigner=std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5, board=Board):
+    def __init__(self, strategy_assigner, difficulty_scale_assigner, board=Board, point_assigner=std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5):
         self.team_num = team_num
         self.question_num = question_num
         self.category_num = category_num

@@ -100,28 +100,19 @@ all_hard = all_scale_x(hard)
 deterministic = framework.Condition(all_greedy, all_baseline)
 
 # Dictionary of all conditions
-std_conditions = {'easy ev': framework.Condition(all_ev, all_easy),
-'medium ev': framework.Condition(all_ev, all_medium),
-'hard ev': framework.Condition(all_ev, all_hard),
-'easy greedy': framework.Condition(all_greedy, all_easy),
-'medium greedy': framework.Condition(all_greedy, all_medium),
-'hard greedy': framework.Condition(all_greedy, all_hard),
-'easy sev': framework.Condition(all_sev, all_easy),
-'medium sev': framework.Condition(all_sev, all_medium),
-'hard sev': framework.Condition(all_sev, all_hard),
-'easy spv': framework.Condition(all_spv, all_easy),
-'medium spv': framework.Condition(all_spv, all_medium),
-'hard spv': framework.Condition(all_spv, all_hard)}
+def compile_conditions(board=framework.Board, point_assigner=framework.std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5):
+    return {'easy ev': framework.Condition(all_ev, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
+    'medium ev': framework.Condition(all_ev, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
+    'hard ev': framework.Condition(all_ev, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
+    'easy greedy': framework.Condition(all_greedy, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
+    'medium greedy': framework.Condition(all_greedy, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
+    'hard greedy': framework.Condition(all_greedy, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
+    'easy sev': framework.Condition(all_sev, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
+    'medium sev': framework.Condition(all_sev, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
+    'hard sev': framework.Condition(all_sev, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
+    'easy spv': framework.Condition(all_spv, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
+    'medium spv': framework.Condition(all_spv, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
+    'hard spv': framework.Condition(all_spv, all_hard, board, point_assigner, team_num, board_num, category_num, question_num)}
 
-split_assigner_conditions = {'easy ev': framework.Condition(all_ev, all_easy, point_assigner=framework.split_give_pts),
-'medium ev': framework.Condition(all_ev, all_medium, point_assigner=framework.split_give_pts),
-'hard ev': framework.Condition(all_ev, all_hard, point_assigner=framework.split_give_pts),
-'easy greedy': framework.Condition(all_greedy, all_easy, point_assigner=framework.split_give_pts),
-'medium greedy': framework.Condition(all_greedy, all_medium, point_assigner=framework.split_give_pts),
-'hard greedy': framework.Condition(all_greedy, all_hard, point_assigner=framework.split_give_pts),
-'easy sev': framework.Condition(all_sev, all_easy, point_assigner=framework.split_give_pts),
-'medium sev': framework.Condition(all_sev, all_medium, point_assigner=framework.split_give_pts),
-'hard sev': framework.Condition(all_sev, all_hard, point_assigner=framework.split_give_pts),
-'easy spv': framework.Condition(all_spv, all_easy, point_assigner=framework.split_give_pts),
-'medium spv': framework.Condition(all_spv, all_medium, point_assigner=framework.split_give_pts),
-'hard spv': framework.Condition(all_spv, all_hard, point_assigner=framework.split_give_pts)}
+std_conditions = compile_conditions()
+split_assigner_conditions = compile_conditions(point_assigner=framework.split_give_pts)
