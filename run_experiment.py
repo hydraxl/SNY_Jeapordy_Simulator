@@ -19,7 +19,7 @@ def run_trial(condition):
     current_team_num = 0
     team_points = np.zeros(condition.team_num)
     for i in range(condition.board_num):
-        board = framework.Board(i + 1, condition.category_num, condition.question_num)
+        board = condition.board(i + 1, condition.category_num, condition.question_num)
         while True in board.view_availability():
             # determine the category/question selected based on team's strategy
             rotated_points = np.roll(team_points, -current_team_num)
@@ -29,8 +29,7 @@ def run_trial(condition):
             points = board.select(category)
 
             # assign points based on distribution
-            winner = condition.point_assigner(rotated_points, rotated_teams, question, random.random)
-            for team in winner: team_points[(team + current_team_num) % condition.team_num] += points
+            team_points += np.roll(condition.point_assigner(rotated_teams, question, points, random.random), current_team_num)
 
             # cycle current_team_num
             current_team_num += 1
