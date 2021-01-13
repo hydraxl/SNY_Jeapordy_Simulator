@@ -10,15 +10,22 @@ from itertools import permutations
 # pick randomly
 def unweighted(board, difficulty_scale, current_scores):
     availability = board.view_availability()
-    options = [i for i in range(len(availability)) if availability[i]]
+    if type(board) == framework.Board:
+        options = [i for i in range(len(availability)) if availability[i]]
+    elif type(board) == framework.OpenBoard:
+        options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
     return random.choice(options)
 
 # stochastically weighted by point value
 def spv(board, difficulty_scale, current_scores):
     vals = board.view_values()
     availability = board.view_availability()
-    options = [i for i in range(len(vals)) if availability[i]]
-    weights = [vals[i] for i in range(len(vals)) if i in options]
+    if type(board) == framework.Board:
+        options = [i for i in range(len(vals)) if availability[i]]
+        weights = [vals[i] for i in range(len(vals)) if availability[i]]
+    elif type(board) == framework.OpenBoard:
+        options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
+        weights = [vals[x][y] for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
     return random.choices(options, weights=weights)[0]
 
 # highest point value

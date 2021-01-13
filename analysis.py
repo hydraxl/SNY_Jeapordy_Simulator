@@ -14,8 +14,7 @@ win_tie = lambda trial_data: np.where(trial_data == max(trial_data))[0]
 advantage = lambda trial_data: max(trial_data) - sorted(trial_data)[-2]
 
 # difference between each team and first place
-amt_behind = lambda trial_data: [max(trial_data) - trial_data[team] for team in trial_data]
-
+amt_behind = lambda trial_data: [max(trial_data) - n for n in trial_data]
 
 # Aggregate Measurements
 
@@ -43,13 +42,13 @@ stddevs = lambda data: np.std(data, axis=0)
 iqr = lambda data: np.subtract(*np.percentile(data, [75, 25], axis=0))
 
 # Data representations
-def print_data(data):
-    print("Means: " + str(means(data)))
-    print("Medians: " + str(medians(data)))
-    print("Stddevs: " + str(stddevs(data)))
-    print("IQRs: " + str(iqr(data)))
+def print_data(data, label=''):
+    print(label, "Means:", str(means(data)))
+    print(label, "Medians:", str(medians(data)))
+    print(label, "Stddevs:", str(stddevs(data)))
+    print(label, "IQRs:", str(iqr(data)))
 
-def histogram(data, bin_func, name='', purpose='Points Scored'):
+def histogram(data, bin_func, name='', label='Points Scored'):
     data = data.T
     num_teams = np.shape(data)[0]
     bins = bin_func(data)
@@ -62,16 +61,16 @@ def histogram(data, bin_func, name='', purpose='Points Scored'):
     for i in range(num_teams):
         Y = np.array([hist_data[i], hist_data[i]]).T.flatten()
         plt.plot(X, Y, label="team " + str(i + 1))
-    plt.xlabel(purpose)
+    plt.xlabel(label)
     plt.ylabel("Count")
     plt.title(name)
     plt.legend(loc='upper right')
 
-def boxplot(data, name='', purpose='Points Scored'):
+def boxplot(data, name='', label='Points Scored'):
     plt.figure()
     plt.boxplot(data)
     plt.xlabel('Team Number')
-    plt.ylabel(purpose)
+    plt.ylabel(label)
     plt.title(name)
 
 def show(): plt.show()

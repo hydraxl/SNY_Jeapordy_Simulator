@@ -1,4 +1,4 @@
-expect = lambda f, input, result: f(input) == result
+import numpy as np
 
 class Board:
     def __init__(self, multiplier=1, category_num=5, question_num=5):

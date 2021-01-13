@@ -7,12 +7,8 @@ import time
 
 # Returns sequence 1 element at a time, then repeats
 def test_seq(seq):
-    def internal_generator():
-        s = seq[:]
-        while True:
-            for n in s: yield n
-    g = internal_generator()
-    return lambda: next(g)
+    internal_generator = (lambda seq: [(yield n) for n in seq])()
+    return lambda: next(internal_generator)
 
 # simulates a single game played given a set of conditions
 def run_trial(condition):
@@ -24,9 +20,13 @@ def run_trial(condition):
             # determine the category/question selected based on team's strategy
             rotated_points = np.roll(team_points, -current_team_num)
             rotated_teams = np.roll(condition.teams, -current_team_num)
-            category = rotated_teams[0].strategy(board, rotated_teams[0].difficulty_scale, rotated_points)
-            question = board.view_question_nums()[category]
-            points = board.select(category)
+            if type(board) == framework.Board:
+                category = rotated_teams[0].strategy(board, rotated_teams[0].difficulty_scale, rotated_points)
+                question = board.view_question_nums()[category]
+                points = board.select(category)
+            elif type(board) == framework.OpenBoard:
+                category, question = rotated_teams[0].strategy(board, rotated_teams[0].difficulty_scale, rotated_points)
+                points = board.select(category, question)
 
             # assign points based on distribution
             team_points += np.roll(condition.point_assigner(rotated_teams, question, points, random.random), current_team_num)
@@ -66,16 +66,22 @@ def run_condition(condition, n=1000):
 def analyze_condition(condition, name=''):
     print(name)
     data = run_condition(condition)
+    win_distances = analysis.collate(analysis.amt_behind, data)
+    advantages = analysis.collate(analysis.advantage, data)
     #bin_func = analysis.by_gap(300)
     #analysis.print_data(data)
     print('Win Odds: ' + str(analysis.win_odds(data)))
-    print('Mean Scores:' + str(analysis.means(data)))
+    print('Mean Scores: ' + str(analysis.means(data)))
+    print('Mean Distance from Win: ' + str(analysis.means(win_distances)))
+    print('Mean Difference between First and Second: ' + str(analysis.means(advantages)))
     #analysis.boxplot(data, name)
     #analysis.histogram(data, bin_func, name)
     print('\n')
     return analysis.win_odds(data)
 
-for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
+#for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
+for name, condition in conditions.std_conditions.items(): analyze_condition(condition, name)
+
 #print(run_trial(conditions.deterministic))
 #analyze_condition(conditions.easy_greedy, "easy")
 #analyze_condition(conditions.medium_greedy, "medium")
