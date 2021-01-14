@@ -64,26 +64,29 @@ def run_condition(condition, n=1000):
 
 # Show data
 def analyze_condition(condition, name=''):
-    print(name)
-    data = run_condition(condition)
-    win_distances = analysis.collate(analysis.amt_behind, data)
-    advantages = analysis.collate(analysis.advantage, data)
-    #bin_func = analysis.by_gap(300)
-    #analysis.print_data(data)
-    print('Win Odds: ' + str(analysis.win_odds(data)))
-    print('Mean Scores: ' + str(analysis.means(data)))
-    print('Mean Distance from Win: ' + str(analysis.means(win_distances)))
-    print('Mean Difference between First and Second: ' + str(analysis.means(advantages)))
-    #analysis.boxplot(data, name)
-    #analysis.histogram(data, bin_func, name)
-    print('\n')
-    return analysis.win_odds(data)
+    mqv = analysis.find_mqv(condition)
 
-#for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
-for name, condition in conditions.std_conditions.items(): analyze_condition(condition, name)
+    print(name)
+    print('Mean Value Question:', mqv)
+
+    data = run_condition(condition) / mqv
+    win_distances = analysis.collate(analysis.amt_behind, data)
+    first_seconds = analysis.collate(analysis.diff_first_second, data)
+    first_lasts = analysis.collate(analysis.diff_first_last, data)
+
+    print('Win Odds:', analysis.win_odds(data))
+    print('Mean Scores:', analysis.means(data))
+    print('Mean Distance from Win:', analysis.means(win_distances))
+    print('Mean Difference between First and Second:', analysis.means(first_seconds))
+    print('Mean Difference between First and Last:', analysis.means(first_lasts))
+
+    #analysis.boxplot(data, name)
+    analysis.histogram(data, analysis.by_gap(1), name + ": score", "Mean Value Questions")
+    analysis.histogram(first_seconds, analysis.by_gap(1), name + ": win amount", "Mean Value Questions")
+    analysis.show()
+    print('\n')
+
+for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
+#for name, condition in conditions.std_conditions.items(): analyze_condition(condition, name)
 
 #print(run_trial(conditions.deterministic))
-#analyze_condition(conditions.easy_greedy, "easy")
-#analyze_condition(conditions.medium_greedy, "medium")
-#analyze_condition(conditions.hard_greedy, "hard")
-#analysis.show()

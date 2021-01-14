@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-'''
-load_scores = lambda name: np.loadtxt(open(name + '.dat'))
-'''
+
+# Finds the mean value of a question
+find_mqv = lambda condition: (1 + condition.question_num) * (sum(range(1, condition.board_num + 1)) / condition.board_num) * 50
+
 
 # Trial Measurements
 winner = lambda trial_data: np.where(trial_data == max(trial_data))[0][0] if len(np.where(trial_data == max(trial_data))[0]) == 1 else None
@@ -11,7 +12,10 @@ winner = lambda trial_data: np.where(trial_data == max(trial_data))[0][0] if len
 win_tie = lambda trial_data: np.where(trial_data == max(trial_data))[0]
 
 # difference between first and second place
-advantage = lambda trial_data: max(trial_data) - sorted(trial_data)[-2]
+diff_first_second = lambda trial_data: max(trial_data) - sorted(trial_data)[-2]
+
+# difference between first and last place
+diff_first_last = lambda trial_data: max(trial_data) - min(trial_data)
 
 # difference between each team and first place
 amt_behind = lambda trial_data: [max(trial_data) - n for n in trial_data]
@@ -41,24 +45,27 @@ medians = lambda data: np.median(data, axis=0)
 stddevs = lambda data: np.std(data, axis=0)
 iqr = lambda data: np.subtract(*np.percentile(data, [75, 25], axis=0))
 
-# Data representations
-def print_data(data, label=''):
-    print(label, "Means:", str(means(data)))
-    print(label, "Medians:", str(medians(data)))
-    print(label, "Stddevs:", str(stddevs(data)))
-    print(label, "IQRs:", str(iqr(data)))
+# Bin Functions
+# Data array must be transposed before entering
+by_num = lambda num: lambda data: np.concatenate((np.arange(np.amin(data), np.amax(data), (np.amax(data) - np.amin(data)) / (num - 1)), np.array([np.amax(data)])))
+by_gap = lambda gap: lambda data: np.arange(np.amin(data), np.amax(data) + gap, gap)
 
-def histogram(data, bin_func, name='', label='Points Scored'):
-    data = data.T
-    num_teams = np.shape(data)[0]
+# Data representations
+def histogram(data, bin_func=by_gap(1), name='', label=''):
     bins = bin_func(data)
-    hist_data = [np.histogram(team_data, bins=bins)[0] for team_data in data]
+    if len(np.shape(data)) == 1:
+        num_graphs = 1
+        hist_data = [np.histogram(data, bins=bins)[0]]
+    elif len(np.shape(data)) == 2:
+        data = data.T
+        num_graphs = np.shape(data)[0]
+        hist_data = [np.histogram(team_data, bins=bins)[0] for team_data in data]
 
     # Plot data
     plt.figure()
     left, right = bins[:-1], bins[1:]
     X = np.array([left, right]).T.flatten()
-    for i in range(num_teams):
+    for i in range(num_graphs):
         Y = np.array([hist_data[i], hist_data[i]]).T.flatten()
         plt.plot(X, Y, label="team " + str(i + 1))
     plt.xlabel(label)
@@ -74,8 +81,3 @@ def boxplot(data, name='', label='Points Scored'):
     plt.title(name)
 
 def show(): plt.show()
-
-# Bin Functions
-# Data array must be transposed before entering
-by_num = lambda num: lambda data: np.concatenate((np.arange(np.amin(data), np.amax(data), (np.amax(data) - np.amin(data)) / (num - 1)), np.array([np.amax(data)])))
-by_gap = lambda gap: lambda data: np.arange(np.amin(data), np.amax(data) + gap, gap)
