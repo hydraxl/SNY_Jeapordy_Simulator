@@ -73,6 +73,7 @@ def not_3rd(board, difficulty_scale, current_scores):
     availability = board.view_availability()
 '''
 
+
 # Difficulty Functions (odds of answering the question correctly by team)
 #   Input: question_num
 #   Output: array of likelihood of answering a question correctly by difficulty
@@ -84,6 +85,49 @@ baseline = scale_maker(1, 1)
 easy = scale_maker(.7, .9)
 medium = scale_maker(.5, .9)
 hard = scale_maker(.3, .9)
+
+
+# Multiplier Functions
+#   Input: Board Number
+#   Output: Board Multiplier
+# How much more than the first board are the questions worth
+base_multiplier = lambda x: x
+ones_multiplier = lambda x: 1
+
+
+# Point Functions
+#   Input: Question Number
+#   Output: Question Value (unmultiplied)
+base_points = lambda x: 100 * x
+one_hundred_points = lambda x: 100
+
+
+# Point Assigners
+#   Determines scoring when team is asked question
+
+# Determine which team to assign points
+def std_give_pts(teams, question, points, rand_func):
+    rand = rand_func()
+    team_num = len(teams)
+    new_points = np.zeros(team_num)
+    odds = 0
+    for i in range(team_num):
+        odds += teams[i].difficulty_scale[question] * (1 - odds)
+        if rand <= odds:
+            new_points[i] += points
+            break;
+    return new_points
+
+# New way of assigning points that lets all other teams attempt if first team fails
+def split_give_pts(teams, question, points, rand_func):
+    team_num = len(teams)
+    new_points = np.zeros(team_num)
+    scorers = []
+    if rand_func() <= teams[0].difficulty_scale[question]: scorers.append(0)
+    else: scorers += [i for i in range(1, len(teams)) if rand_func() <= teams[i].difficulty_scale[question]]
+    for i in scorers: new_points[i] += points / len(scorers)
+    return new_points
+
 
 # Strategy Assigners
 #   Input: total number of teams, current team
@@ -119,23 +163,18 @@ all_hard = all_scale_x(hard)
 #   that are different on higher difficulties
 
 # Always takes the highest point value and answers correctly
-deterministic = framework.Condition(all_greedy, all_baseline)
+deterministic = framework.Condition(all_greedy, all_baseline, base_multiplier, base_points)
+
+
+# List of all strategy functions
+strategies = [('ev', all_ev), ('greedy', all_greedy), ('sev', all_sev), ('spv', all_spv)]
+
+# List of all difficulty assigners
+difficulties = [('easy', all_easy), ('medium', all_medium), ('hard', all_hard)]
 
 # Dictionary of all conditions
-def compile_conditions(board=framework.Board, point_assigner=framework.std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5):
-    return {'easy ev': framework.Condition(all_ev, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
-    'medium ev': framework.Condition(all_ev, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
-    'hard ev': framework.Condition(all_ev, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
-    'easy greedy': framework.Condition(all_greedy, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
-    'medium greedy': framework.Condition(all_greedy, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
-    'hard greedy': framework.Condition(all_greedy, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
-    'easy sev': framework.Condition(all_sev, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
-    'medium sev': framework.Condition(all_sev, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
-    'hard sev': framework.Condition(all_sev, all_hard, board, point_assigner, team_num, board_num, category_num, question_num),
-    'easy spv': framework.Condition(all_spv, all_easy, board, point_assigner, team_num, board_num, category_num, question_num),
-    'medium spv': framework.Condition(all_spv, all_medium, board, point_assigner, team_num, board_num, category_num, question_num),
-    'hard spv': framework.Condition(all_spv, all_hard, board, point_assigner, team_num, board_num, category_num, question_num)}
+compile_conditions = lambda multiplier_function=base_multiplier, point_function=base_points, board=framework.Board, point_assigner=std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5: {diff_name + ' ' + strat_name: framework.Condition(strat, diff, multiplier_function, point_function, board, point_assigner, team_num, board_num, category_num, question_num) for strat_name, strat in strategies for diff_name, diff in difficulties}
 
 std_conditions = compile_conditions()
-split_assigner_conditions = compile_conditions(point_assigner=framework.split_give_pts)
+split_assigner_conditions = compile_conditions(point_assigner=split_give_pts)
 open_board_conditions = compile_conditions(board=framework.OpenBoard)

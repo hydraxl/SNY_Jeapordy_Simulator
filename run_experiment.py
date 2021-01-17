@@ -85,7 +85,7 @@ def analyze_condition(condition, name=''):
     #analysis.histogram(first_seconds, analysis.by_gap(1), name + ": win amount", "Mean Value Questions")
     #analysis.show()
 
-for name, condition in conditions.std_conditions.items(): analyze_condition(condition, name)
+#for name, condition in conditions.std_conditions.items(): analyze_condition(condition, name)
 #for name, condition in conditions.open_board_conditions.items(): analyze_condition(condition, name)
-#for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
+for name, condition in conditions.split_assigner_conditions.items(): analyze_condition(condition, name)
 #print(run_trial(conditions.deterministic))

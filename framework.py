@@ -37,32 +37,8 @@ class Team:
         self.num = num
 
 
-# Determine which team to assign points
-def std_give_pts(teams, question, points, rand_func):
-    rand = rand_func()
-    team_num = len(teams)
-    new_points = np.zeros(team_num)
-    odds = 0
-    for i in range(team_num):
-        odds += teams[i].difficulty_scale[question] * (1 - odds)
-        if rand <= odds:
-            new_points[i] += points
-            break;
-    return new_points
-
-# New way of assigning points that lets all other teams attempt if first team fails
-def split_give_pts(teams, question, points, rand_func):
-    team_num = len(teams)
-    new_points = np.zeros(team_num)
-    scorers = []
-    if rand_func() <= teams[0].difficulty_scale[question]: scorers.append(0)
-    else: scorers += [i for i in range(1, len(teams)) if rand_func() <= teams[i].difficulty_scale[question]]
-    for i in scorers: new_points[i] += points / len(scorers)
-    return new_points
-
-
 class Condition:
-    def __init__(self, strategy_assigner, difficulty_scale_assigner, board=Board, point_assigner=std_give_pts, team_num=3, board_num=2, category_num=5, question_num=5):
+    def __init__(self, strategy_assigner, difficulty_scale_assigner, multiplier_function, point_function, point_assigner, board=Board, team_num=3, board_num=2, category_num=5, question_num=5):
         self.team_num = team_num
         self.question_num = question_num
         self.category_num = category_num
