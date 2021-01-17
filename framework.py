@@ -26,7 +26,7 @@ class OpenBoard:
         self.available[category][question] = False
         return (question + 1) * 100 * self.multiplier
 
-    view_values = lambda self: [[100 * (q + 1) * self.multiplier for q in range(len(self.available[0])) if self.available[c][q]] for c in range(len(self.available))]
+    view_values = lambda self: [[100 * (q + 1) * self.multiplier for q in range(len(self.available[0]))] for c in range(len(self.available))]
     view_availability = lambda self: [s[:] for s in self.available]
 
 

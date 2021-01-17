@@ -21,34 +21,49 @@ def spv(board, difficulty_scale, current_scores):
     vals = board.view_values()
     availability = board.view_availability()
     if type(board) == framework.Board:
-        options = [i for i in range(len(vals)) if availability[i]]
-        weights = [vals[i] for i in range(len(vals)) if availability[i]]
+        options = [i for i in range(len(availability)) if availability[i]]
+        weights = [vals[i] for i in options]
     elif type(board) == framework.OpenBoard:
         options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
-        weights = [vals[x][y] for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
+        weights = [vals[x][y] for x, y in options]
     return random.choices(options, weights=weights)[0]
 
 # highest point value
 def greedy(board, difficulty_scale, current_scores):
     vals = board.view_values()
     availability = board.view_availability()
-    options = [i for i in range(len(vals)) if availability[i]]
-    return max(options)
+    if type(board) == framework.Board:
+        options = [i for i in range(len(availability)) if availability[i]]
+        weights = [vals[i] for i in options]
+    elif type(board) == framework.OpenBoard:
+        options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
+        weights = [vals[x][y] for x, y in options]
+    return options[weights.index(max(weights))]
 
 # stochastic expected value
 def sev(board, difficulty_scale, current_scores):
-    vals = board.view_question_nums()
+    vals = board.view_values()
     availability = board.view_availability()
-    options = [i for i in range(len(vals)) if availability[i]]
-    weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
-    return random.choices(options)[0]
+    if type(board) == framework.Board:
+        nums = board.view_question_nums()
+        options = [i for i in range(len(availability)) if availability[i]]
+        weights = [vals[i] * difficulty_scale[nums[i]] for i in options]
+    elif type(board) == framework.OpenBoard:
+        options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
+        weights = [vals[x][y] * difficulty_scale[y] for x, y in options]
+    return random.choices(options, weights=weights)[0]
 
 # expected value
 def ev(board, difficulty_scale, current_scores):
-    vals = board.view_question_nums()
+    vals = board.view_values()
     availability = board.view_availability()
-    options = [i for i in range(len(vals)) if availability[i]]
-    weights = [vals[i] * difficulty_scale[vals[i]] for i in range(len(vals)) if availability[i]]
+    if type(board) == framework.Board:
+        nums = board.view_question_nums()
+        options = [i for i in range(len(availability)) if availability[i]]
+        weights = [vals[i] * difficulty_scale[nums[i]] for i in options]
+    elif type(board) == framework.OpenBoard:
+        options = [(x, y) for x in range(len(availability)) for y in range(len(availability[0])) if availability[x][y]]
+        weights = [vals[x][y] * difficulty_scale[y] for x, y in options]
     return options[weights.index(max(weights))]
 
 '''
@@ -123,3 +138,4 @@ def compile_conditions(board=framework.Board, point_assigner=framework.std_give_
 
 std_conditions = compile_conditions()
 split_assigner_conditions = compile_conditions(point_assigner=framework.split_give_pts)
+open_board_conditions = compile_conditions(board=framework.OpenBoard)

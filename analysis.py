@@ -18,7 +18,7 @@ diff_first_second = lambda trial_data: max(trial_data) - sorted(trial_data)[-2]
 diff_first_last = lambda trial_data: max(trial_data) - min(trial_data)
 
 # difference between each team and first place
-amt_behind = lambda trial_data: [max(trial_data) - n for n in trial_data]
+loss_amt = lambda trial_data: [max(trial_data) - n for n in trial_data]
 
 # Aggregate Measurements
 
